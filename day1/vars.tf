@@ -11,7 +11,7 @@ variable "createway" {
   default = "terraform"
 }
 variable "machinetype" {
-  default = "e2-custom-6-8192"
+  default = "n1-custom-1-2048"
 }
 variable "image" {
   default = "centos-cloud/centos-7"

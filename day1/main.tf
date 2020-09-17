@@ -60,10 +60,11 @@ resource "google_compute_instance" "default" {
   #metadata_startup_script = <<EFO
   #EFO
   metadata_startup_script = templatefile("startup.sh", {
-    name    = "Sergei"
-    surname = "Shevtsov"
-    ext_ip  = google_compute_address.external_ip.address
-    int_ip  = google_compute_address.internal_ip.address
+    name          = "Sergei"
+    surname       = "Shevtsov"
+    ext_ip        = google_compute_address.external_ip.address
+    int_ip        = google_compute_address.internal_ip.address
+    ip_client_int = "10.109.1.3"
   })
 
   boot_disk {
@@ -86,6 +87,47 @@ resource "google_compute_instance" "default" {
     access_config {
       // Ephemeral IP
       nat_ip = google_compute_address.external_ip.address
+    }
+  }
+}
+resource "google_compute_instance" "prometheus_cli" {
+  count        = 1
+  name         = "prometheus-cli-${var.createway}"
+  machine_type = "${var.machinetype}"
+  zone         = "${var.zone}"
+  description  = "create prometheus clients"
+  tags         = ["prometheus-web"]
+  metadata = {
+    ssh-keys = "centos:${file("id_rsa.pub")}"
+  }
+  #    tags = var.tags
+  #    labels = var.labels
+  #metadata_startup_script = <<EFO
+  #EFO
+  metadata_startup_script = templatefile("startup-cli.sh", {
+    name                   = "Sergei"
+    surname                = "Shevtsov"
+    ip_prometheus_serv_int = google_compute_instance.default.network_interface.0.network_ip
+  })
+
+  boot_disk {
+    initialize_params {
+      image = "${var.image}"
+      size  = "${var.hdd-size}"
+      type  = "${var.hdd-type}"
+    }
+
+  }
+  #provisioner "file" {
+  #  source      = "scripts/"
+  #  destination = "/home/"
+  #}
+  network_interface {
+    #  count      = "${var.network-name}" == "default" ? 0 : 1
+    network    = google_compute_network.prometheus_network.name    #"${var.network-name}"
+    subnetwork = google_compute_subnetwork.prometheus_sub_net.name #"${var.sub-network-name}"
+    access_config {
+      // Ephemeral IP
     }
   }
 }

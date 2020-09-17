@@ -129,7 +129,7 @@ scrape_configs:
   - job_name: node
     scrape_interval: 5s
     static_configs:
-    - targets: ['${int_ip}:9100']
+    - targets: ['${int_ip}:9100','${ip_client_int}:9100']
   - job_name: blackbox
     scrape_interval: 15s
     scrape_timeout: 10s
